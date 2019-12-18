@@ -1,0 +1,8 @@
+version: "3"
+services:
+  dashboard:
+    build: ./dashboard
+    command: npm start
+    ports: 
+      - "5000:3000"
+      
