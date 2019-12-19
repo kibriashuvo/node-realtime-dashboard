@@ -8,7 +8,9 @@ RUN express -e
 
 COPY package*.json ./
 
-COPY routes/index.js ./routes/index.js
+COPY routes/* ./routes/
+
+COPY views/* ./views/
 
 RUN npm install
 
