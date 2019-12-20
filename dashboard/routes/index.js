@@ -1,8 +1,13 @@
 var express = require('express');
 var router = express.Router();
 
+
+//=========Bluebird===========
+
+var bluebird = require("bluebird");
 //=========Redis==============
 var redis = require('redis');
+bluebird.promisifyAll(redis.RedisClient.prototype);
 var redisClient = redis.createClient(process.env.REDIS_PORT || '6379',process.env.REDIS_URL || '127.0.0.1')
 
 
@@ -60,10 +65,7 @@ router.get('/redis_status', function(req, res, next) {
 
 /* GET home page. */
 router.get('/view_chart', function(req, res, next) {
-  var all_values = [];
-  for(var i=1; i<=255; i++){
-    all_values.push(getDataForChart(i,addToList));
-  }
+  
   
 
   /*
@@ -84,14 +86,24 @@ router.get('/view_chart', function(req, res, next) {
     }
   }
   */
-  console.log(JSON.stringify(all_values));
+  getDataForChart().then((results)=>{
+    console.log(JSON.stringify(results));
+  });
+  
   res.render('redis', { title: 'Express' });
 });
 
-var getDataForChart = function(key, callback,values){
-  redisClient.get(key, function(error,reply){
-    callback(key, reply,values);
-  });
+var getDataForChart = function(){
+  var all_values = [];
+  for(var i=1; i<=255; i++){  
+    all_values.push(
+      redisClient.getAsync(i).then(function(reply){
+        console.log("Reply from async: "+reply);
+        return reply;
+      })
+    );   
+  }
+  return Promise.all(all_values);
 } 
 
 var addToList = function(key, result){
