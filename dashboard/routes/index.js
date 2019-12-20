@@ -30,7 +30,6 @@ router.get('/redis_get', function(req, res, next) {
 });
 
 
-
 router.get('/redis_set', function(req, res, next) {
   var key = req.query.key;
   var value = req.query.val;
@@ -43,7 +42,7 @@ router.get('/redis_set', function(req, res, next) {
 
 router.get('/populate_redis', function(req, res, next) {
   for(var i=1; i<=255; i++){
-    redisClient.set(i,Math.round(Math.random() * 20));
+    redisClient.set(i,JSON.stringify({location: i, tip_amount: Math.round(Math.random() * 20)}));
   }
   res.send("Populated");
 });
@@ -65,59 +64,50 @@ router.get('/redis_status', function(req, res, next) {
 
 /* GET home page. */
 router.get('/view_chart', function(req, res, next) {
-  
-  
 
-  /*
-  for(var i=1; i<=255; i++){
-    redisClient.get(i, function (error, result) {
-      if (error) {
-          console.log(error);
-          //throw error;
-      }
-      
-      addToList(result);
-    
-      
+  getDataForChart().
+    then((results)=>{
+      var topN = getNMaxElements(results,10);
+      console.log(JSON.stringify(topN));
+    }).
+    catch((e)=>{
+      console.log(e);
     });
-    function addToList(result){
-      console.log(JSON.stringify({key:i,val:result}));
-      all_values.push({key:i,val:result});
-    }
-  }
-  */
-  getDataForChart().then((results)=>{
-    console.log(JSON.stringify(results));
-  });
   
   res.render('redis', { title: 'Express' });
 });
 
 var getDataForChart = function(){
   var all_values = [];
-  for(var i=1; i<=255; i++){  
+  for(var i=1; i<=255; i++){      
     all_values.push(
       redisClient.getAsync(i).then(function(reply){
         console.log("Reply from async: "+reply);
         return reply;
       })
-    );   
+    );
   }
+  //This will return after the async finish their job
   return Promise.all(all_values);
 } 
 
-var addToList = function(key, result){
-  console.log("callback called"+JSON.stringify({key:key,val:result}));
-  return {key:key,val:result};
-  //callback(values);
+var getNMaxElements = function(arrayToBeSorted, n){
+  var arrayOfSizeN = new Array();
+  for(var i=0; i < arrayToBeSorted.length; i++){
+    arrayOfSizeN.push(arrayToBeSorted[i]);
+    if(arrayOfSizeN.length > n){
+      arrayOfSizeN.sort((a,b) => 
+      { 
+        var a_obj = JSON.parse(a);
+        var b_obj = JSON.parse(b);
+        return b_obj.tip_amount-a_obj.tip_amount; 
+      });
+      arrayOfSizeN.pop();
+    }
+  }
+  return arrayOfSizeN;
 }
 
-var mainCaller = function(values_array){
-  for(var i=1; i<=255; i++){
-    getDataForChart(values_array,i,addToList);
-  }
-  return values_array;
-}
 
 
 module.exports = router;
