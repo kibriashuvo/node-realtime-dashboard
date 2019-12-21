@@ -68,13 +68,25 @@ router.get('/view_chart', function(req, res, next) {
   getDataForChart().
     then((results)=>{
       var topN = getNMaxElements(results,10);
+      var labels = [];
+      var values = [];
+      
+      topN.forEach((element) =>{
+        var e = JSON.parse(element);
+         labels.push(e.location);
+         values.push(e.tip_amount);
+      });
+     
+      console.log("values:"+values);
       console.log(JSON.stringify(topN));
+      res.render('redis', { labels: labels, values: values, title:"Express" });
     }).
     catch((e)=>{
       console.log(e);
+      res.send("Error");
     });
+   
   
-  res.render('redis', { title: 'Express' });
 });
 
 var getDataForChart = function(){

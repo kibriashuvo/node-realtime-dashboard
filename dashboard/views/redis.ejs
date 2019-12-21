@@ -14,13 +14,15 @@
 
     <script type="text/javascript">
         var ctx = document.getElementById("myChart");
+        var l = [<%= labels %>];
+        var d = [<%= values %>];
         var myChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ["2015-01", "2015-02", "2015-03", "2015-04", "2015-05", "2015-06", "2015-07", "2015-08", "2015-09", "2015-10", "2015-11", "2015-12"],
+            labels: l,
             datasets: [{
             label: '# of Tomatoes',
-            data: [12, 19, 3, 5, 2, 3, 20, 3, 5, 6, 2, 1],
+            data: d,
             backgroundColor: [
                 'rgba(255, 99, 132, 0.2)',
                 'rgba(54, 162, 235, 0.2)',
