@@ -8,6 +8,8 @@ RUN express -e
 
 COPY package*.json ./
 
+COPY app.js ./
+
 COPY routes/* ./routes/
 
 COPY views/* ./views/
