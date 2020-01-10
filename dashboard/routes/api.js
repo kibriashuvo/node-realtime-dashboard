@@ -39,16 +39,18 @@ router.get('/locations', function(req, res, next) {
       var topN = getNMaxElements(results,10);
       var labels = [];
       var values = [];
+      var pop_locs = [];
       
       topN.forEach((element) =>{
         var e = JSON.parse(element);
-         labels.push(e.location);
-         values.push(e.tip_amount);
+        pop_locs.push({location_id:e.location,tip_amount:e.tip_amount});
+        //labels.push(e.location);
+        //values.push(e.tip_amount);
       });
      
       console.log("values:"+values);
       console.log(JSON.stringify(topN));
-      res.json({ labels: labels, values: values});
+      res.json(pop_locs);
     }).
     catch((e)=>{
       console.log(e);
